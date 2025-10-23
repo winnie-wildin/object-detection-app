@@ -1,0 +1,32 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: obj_det_frontend
+    ports:
+      - "8000:8000"
+    environment:
+      - DETECTION_SERVICE_URL=http://detection-service:8001
+    volumes:
+      - ./outputs:/app/static/results
+      - ./frontend:/app  
+    depends_on:
+      - detection-service
+    networks:
+      - detection-network
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload  # Auto-reload on changes
+
+  detection-service:
+    build: ./detection-service
+    container_name: obj_det_detection
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./outputs:/app/results
+      - ./detection-service:/app  
+    networks:
+      - detection-network
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload  # Auto-reload on changes
+
+networks:
+  detection-network:
+    driver: bridge

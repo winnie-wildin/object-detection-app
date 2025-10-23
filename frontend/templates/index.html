@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #F5F1E8 0%, #E8DCC8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #2C2420;
+            font-weight: 300;
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6B5D54;
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            margin: 40px 0;
+            border: 2px dashed #C4B5A0;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #2C2420;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .upload-label {
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #6B5D54;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            color: #2C2420;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: #6B5D54;
+            font-size: 0.9rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .detect-btn {
+            background: #2C2420;
+            color: #F5F1E8;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 30px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .detect-btn:hover {
+            background: #1A1512;
+            transform: translateY(-2px);
+        }
+
+        .detect-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 40px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .image-card h3 {
+            color: #2C2420;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .image-card img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .json-output {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .json-output h3 {
+            color: #2C2420;
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .detection-item {
+            background: #F5F1E8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2C2420;
+        }
+
+        .detection-item strong {
+            color: #2C2420;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #E8DCC8;
+            border-top: 4px solid #2C2420;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .preview-image {
+            max-width: 300px;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DETECT</h1>
+            <p class="subtitle">OBJECT DETECTION SERVICE</p>
+        </header>
+
+        <div class="upload-section">
+            <label for="fileInput" class="upload-label">
+                <div class="upload-icon">📤</div>
+                <div class="upload-text">Drop your image here or click to browse</div>
+                <div class="upload-hint">Supports JPG, PNG, JPEG</div>
+            </label>
+            <input type="file" id="fileInput" accept="image/*">
+            <img id="previewImage" class="preview-image" alt="Preview">
+            <button class="detect-btn" id="detectBtn">DETECT OBJECTS</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: #2C2420;">Processing your image...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-grid">
+                <div class="image-card">
+                    <h3>ORIGINAL IMAGE</h3>
+                    <img id="originalImage" alt="Original">
+                </div>
+                <div class="image-card">
+                    <h3>DETECTED OBJECTS</h3>
+                    <img id="resultImage" alt="Result">
+                </div>
+            </div>
+
+            <div class="json-output">
+                <h3>DETECTION RESULTS</h3>
+                <div id="detectionsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const detectBtn = document.getElementById('detectBtn');
+        const previewImage = document.getElementById('previewImage');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const resultsSection = document.getElementById('resultsSection');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                    detectBtn.style.display = 'inline-block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        detectBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            resultsSection.style.display = 'none';
+            detectBtn.disabled = true;
+
+            try {
+                const response = await fetch('/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('originalImage').src = data.original_image;
+                    document.getElementById('resultImage').src = data.result_image;
+
+                    const detectionsList = document.getElementById('detectionsList');
+                    detectionsList.innerHTML = '';
+
+                    if (data.no_detections) {
+                        // Show friendly "no detections" message
+                        const noDetectMsg = document.createElement('div');
+                        noDetectMsg.style.cssText = 'background: #F5F1E8; padding: 30px; border-radius: 15px; text-align: center; border: 2px dashed #C4B5A0;';
+                        noDetectMsg.innerHTML = `
+                            <div style="font-size: 3rem; margin-bottom: 15px;">🤷‍♂️</div>
+                            <h3 style="color: #2C2420; margin-bottom: 10px;">No Objects Detected</h3>
+                            <p style="color: #6B5D54; font-size: 1rem; line-height: 1.6;">
+                                ${data.message}
+                            </p>
+                            <p style="color: #6B5D54; font-size: 0.9rem; margin-top: 15px;">
+                                <strong>Tried thresholds:</strong> 0.25 → 0.15 → 0.10 → 0.05
+                            </p>
+                        `;
+                        detectionsList.appendChild(noDetectMsg);
+                    } else {
+                        // Show threshold info
+                        const thresholdInfo = document.createElement('div');
+                        thresholdInfo.style.cssText = 'background: #E8DCC8; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;';
+                        thresholdInfo.innerHTML = `
+                            <strong style="color: #2C2420;"> ${data.message}</strong>
+                        `;
+                        detectionsList.appendChild(thresholdInfo);
+
+                        // Show detections
+                        data.detections.forEach((det, idx) => {
+                            const item = document.createElement('div');
+                            item.className = 'detection-item';
+                            item.innerHTML = `
+                                <strong>Object ${idx + 1}:</strong> ${det.class} 
+                                (Confidence: ${(det.confidence * 100).toFixed(1)}%)
+                                <br>
+                                <small>Position: [${det.bbox.map(v => v.toFixed(0)).join(', ')}]</small>
+                            `;
+                            detectionsList.appendChild(item);
+                        });
+                    }
+
+                    resultsSection.style.display = 'block';
+                } else {
+                    error.textContent = `Error: ${data.error}`;
+                    error.style.display = 'block';
+                }
+            } catch (err) {
+                error.textContent = `Error: ${err.message}`;
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                detectBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

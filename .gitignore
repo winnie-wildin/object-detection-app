@@ -1,0 +1,38 @@
+notepad .gitignore
+```
+
+```
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Docker
+.dockerignore
+
+# Uploads and results (don't commit these)
+frontend/static/uploads/*
+frontend/static/results/*
+detection-service/uploads/*
+detection-service/results/*
+outputs/*
+
+# Keep folder structure
+!frontend/static/uploads/.gitkeep
+!frontend/static/results/.gitkeep
+!detection-service/uploads/.gitkeep
+!detection-service/results/.gitkeep
+!outputs/.gitkeep
+
+# Model weights (will download automatically)
+*.pt
+*.pth
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Environment
+.env
+*.log
