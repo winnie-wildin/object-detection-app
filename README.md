@@ -69,7 +69,7 @@ object-detection-app/
 ## Screenshots
 **Upload Interface:**
 
-![Upload Interface](screenshots/interface.PNG)
+![Upload Interface](screenshots/Interface.PNG)
 
 **Detection Results:**
 
