@@ -3,12 +3,12 @@
 A microservice architecture for real-time object detection using YOLOv8 and FastAPI.
 
 ## Features
-Detects objects in images using YOLOv8
-Microservice architecture with separate frontend and detection services
-Containerized with Docker for easy deployment
-RESTful API
-Outputs JSON with bounding box coordinates
-Saves annotated images and detection data
+- Detects objects in images using YOLOv8
+- Microservice architecture with separate frontend and detection services
+- Containerized with Docker for easy deployment
+- RESTful API
+- Outputs JSON with bounding box coordinates
+- Saves annotated images and detection data
 
 ## Tech Stack
 
@@ -69,13 +69,13 @@ object-detection-app/
 ## Screenshots
 **Upload Interface:**
 
-![Upload Interface](screenshots/interface.png)
+![Upload Interface](screenshots/interface.PNG)
 
 **Detection Results:**
 
-![Detection Result](screenshots/result.png)
+![Detection Result](screenshots/result.PNG)
 
-![Annotated Image](screenshots/annotated_image.png)
+![Annotated Image](screenshots/annotated_image.PNG)
 
 ## Stopping
 ```bash
