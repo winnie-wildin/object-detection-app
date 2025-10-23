@@ -60,8 +60,14 @@ object-detection-app/
 │   ├── main.py
 │   ├── requirements.txt
 │   └── Dockerfile
-├── docker-compose.yml
+├── examples/
+│   ├── eg1.json
+├── screenshots/
+│   ├── Interface.PNG
+│   ├── result.PNG
+│   └── annotated_image.PNG
 ├── outputs/
+├── docker-compose.yml
 ├── README.md
 └── SETUP.md
 ```
